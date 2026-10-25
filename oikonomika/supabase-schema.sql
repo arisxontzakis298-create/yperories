@@ -171,3 +171,18 @@ revoke insert, update, delete on public.households from anon, authenticated;
 revoke insert, update, delete on public.household_members from anon, authenticated;
 grant select on public.households, public.household_members, public.transactions, public.budgets, public.recurring_items to authenticated;
 grant insert, update, delete on public.transactions, public.budgets, public.recurring_items to authenticated;
+
+
+-- Enable Supabase Realtime for cross-device updates. Safe to run repeatedly.
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='transactions') then
+    alter publication supabase_realtime add table public.transactions;
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='budgets') then
+    alter publication supabase_realtime add table public.budgets;
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='recurring_items') then
+    alter publication supabase_realtime add table public.recurring_items;
+  end if;
+end $$;
